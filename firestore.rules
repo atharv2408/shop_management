@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Verify user belongs to the shop
+    function belongsToShop(shopId) {
+      return isAuthenticated() && 
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.shopId == shopId);
+    }
+
+    // Allow authenticated users to read/write their own user profile
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Allow creating shops
+    match /shops/{shopId} {
+      allow create: if isAuthenticated();
+      // Allow read/write if you obey the shop membership OR if you own it (critical for initial setup)
+      allow read, write: if belongsToShop(shopId) || resource.data.ownerId == request.auth.uid;
+    }
+
+    // Invitations
+    match /invitations/{email} {
+      // Allow reading if it's YOUR email (so you can check if you were invited)
+      allow read: if isAuthenticated() && request.auth.token.email.lower() == email.lower();
+      // Allow creating/writing if you belong to the shop you are inviting to
+      allow create, write: if belongsToShop(request.resource.data.shopId);
+    }
+    
+    match /products/{productId} {
+      // Allow if user belongs to the shop of this product
+      allow read: if belongsToShop(resource.data.shopId);
+      // Allow create if assigning to own shop
+      allow create: if belongsToShop(request.resource.data.shopId);
+      // Allow update/delete if belongs to shop
+      allow update, delete: if belongsToShop(resource.data.shopId);
+    }
+    
+    match /orders/{orderId} {
+      allow read: if belongsToShop(resource.data.shopId);
+      allow create: if belongsToShop(request.resource.data.shopId);
+      allow update, delete: if belongsToShop(resource.data.shopId);
+    }
+
+    match /customers/{customerId} {
+      allow read: if belongsToShop(resource.data.shopId);
+      allow create: if belongsToShop(request.resource.data.shopId);
+      allow update, delete: if belongsToShop(resource.data.shopId);
+      
+      match /transactions/{transactionId} {
+        allow read: if belongsToShop(get(/databases/$(database)/documents/customers/$(customerId)).data.shopId);
+        allow create: if belongsToShop(get(/databases/$(database)/documents/customers/$(customerId)).data.shopId);
+         allow update, delete: if belongsToShop(get(/databases/$(database)/documents/customers/$(customerId)).data.shopId);
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
