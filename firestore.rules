@@ -59,6 +59,12 @@ service cloud.firestore {
       }
     }
 
+    match /special_notes/{noteId} {
+      allow read: if belongsToShop(resource.data.shopId);
+      allow create: if belongsToShop(request.resource.data.shopId);
+      allow update, delete: if belongsToShop(resource.data.shopId);
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

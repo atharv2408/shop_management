@@ -10,7 +10,9 @@ import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Billing from './pages/Billing';
+import SpecialNotes from './pages/SpecialNotes';
 import PayLater from './pages/PayLater';
+import Settings from './pages/Settings';
 
 function App() {
     return (
@@ -33,7 +35,9 @@ function App() {
                             <Route path="dashboard" element={<Dashboard />} />
                             <Route path="inventory" element={<Inventory />} />
                             <Route path="billing" element={<Billing />} />
+                            <Route path="special-notes" element={<SpecialNotes />} />
                             <Route path="pay-later" element={<PayLater />} />
+                            <Route path="settings" element={<Settings />} />
                         </Route>
 
                         {/* Catch all */}
