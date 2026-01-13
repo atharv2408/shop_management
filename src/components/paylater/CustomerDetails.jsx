@@ -45,7 +45,6 @@ const CustomerDetails = ({ customer, onBack }) => {
     }, [customer.id]);
 
     const [amount, setAmount] = useState('');
-    const [note, setNote] = useState('');
 
     const handleTransaction = async (transactionMode) => {
         if (!amount || isNaN(amount) || Number(amount) <= 0) return toast.error("Invalid amount");
@@ -72,7 +71,7 @@ const CustomerDetails = ({ customer, onBack }) => {
                 transaction.set(newTransactionRef, {
                     type: isPayment ? 'payment' : 'credit',
                     amount: val,
-                    note: note || (isPayment ? 'Payment Received' : 'Manual Charge'),
+                    note: (isPayment ? 'Payment Received' : 'Manual Charge'),
                     createdAt: serverTimestamp(), // Use server timestamp
                     date: new Date().toISOString() // For easier frontend display if needed immediately
                 });
@@ -80,7 +79,6 @@ const CustomerDetails = ({ customer, onBack }) => {
 
             toast.success("Transaction successful");
             setAmount('');
-            setNote('');
         } catch (error) {
             console.error(error);
             toast.error("Transaction failed");
@@ -119,36 +117,32 @@ const CustomerDetails = ({ customer, onBack }) => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="mt-6 flex gap-3">
-                    <div className="flex-1 bg-white dark:bg-neutral-800 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex gap-2">
+                <div className="mt-6">
+                    <div className="bg-white dark:bg-neutral-800 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex flex-col md:flex-row gap-3">
                         <Input
                             type="number"
                             placeholder="Amount"
                             value={amount}
                             onChange={e => setAmount(e.target.value)}
-                            className="w-32"
+                            className="w-full md:w-48 text-lg"
                         />
-                        <Input
-                            placeholder="Note (Optional)"
-                            value={note}
-                            onChange={e => setNote(e.target.value)}
-                            className="flex-1"
-                        />
-                        <div className="flex gap-2">
+                        {/* Note input removed as requested */}
+
+                        <div className="flex gap-2 flex-1">
                             <Button
                                 onClick={() => handleTransaction('payment')}
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 md:py-2"
                                 disabled={!amount}
                             >
-                                <ArrowDownLeft className="w-4 h-4 mr-2" />
+                                <ArrowDownLeft className="w-5 h-5 md:w-4 md:h-4 mr-2" />
                                 Pay
                             </Button>
                             <Button
                                 onClick={() => handleTransaction('credit')}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 md:py-2"
                                 disabled={!amount}
                             >
-                                <ArrowUpRight className="w-4 h-4 mr-2" />
+                                <ArrowUpRight className="w-5 h-5 md:w-4 md:h-4 mr-2" />
                                 Add Due
                             </Button>
                         </div>
